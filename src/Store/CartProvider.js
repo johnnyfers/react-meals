@@ -13,7 +13,7 @@ const cartReducer = (state, action) => {
                 items: updatedItems,
                 totalAmount: updatedTotalAmount
             }
-            default:
+        default:
             return defaultCartState
     }
 }
