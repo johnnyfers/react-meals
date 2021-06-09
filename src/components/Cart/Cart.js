@@ -1,29 +1,34 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 
 import classes from './Cart.module.css'
 import Modal from '../UI/Modal/Modal'
 import CartContext from '../../Store/Cart-context'
-
+import Checkout from './Checkout/Checkout'
 import CartItem from './CartItem/CartItem'
 
 const Cart = (props) => {
+    const [isCheckout, setIsCheckout] = useState(false)
 
     const CartCtx = useContext(CartContext)
 
     const totalAmount = `$${CartCtx.totalAmount.toFixed(2).replace('.', ',')}`
     const hasItems = CartCtx.items.length > 0
 
-    const cartItemRemoveHandler = (id)=> {
-       CartCtx.removeItem(id)
+    const orderHandler = () => {
+        setIsCheckout(true)
     }
 
-    const cartItemAddHandler = (item)=> {
+    const cartItemRemoveHandler = (id) => {
+        CartCtx.removeItem(id)
+    }
+
+    const cartItemAddHandler = (item) => {
         CartCtx.addItem(item)
     }
 
     const cartItems = (
         <ul className={classes['cart-items']}>
-            {CartCtx.items.map((item) => 
+            {CartCtx.items.map((item) =>
                 <CartItem
                     key={item.id}
                     name={item.name}
@@ -36,6 +41,13 @@ const Cart = (props) => {
         </ul>
     )
 
+    const submitOrderHandler = (userData)=> {
+        fetch('https://react-http-class-default-rtdb.firebaseio.com/orders.json',{
+            method: 'POST',
+            body: JSON.stringify({user: userData, orderedItems: CartCtx.items})
+        })
+    }
+
     return (
         <Modal onClick={props.onHideCart}>
             {cartItems}
@@ -43,10 +55,15 @@ const Cart = (props) => {
                 <span>Total Amount</span>
                 <span>{totalAmount}</span>
             </div>
-            <div className={classes.actions}>
-                <button className={classes['button--alt']} onClick={props.onHideCart}>Close</button>
-                {hasItems && <button className={classes.buttons}>Order</button>}
-            </div>
+
+            {isCheckout && <Checkout onConfirm={submitOrderHandler} onCancel={props.onHideCart} />}
+
+            {!isCheckout &&
+                <div className={classes.actions}>
+                    <button className={classes['button--alt']} onClick={props.onHideCart}>Close</button>
+                    {hasItems && <button className={classes.buttons} onClick={orderHandler}>Order</button>}
+                </div>
+            }
         </Modal>
     )
 }
