@@ -5,8 +5,6 @@ import Cart from './components/Cart/Cart'
 import { useState } from 'react'
 import CartProvider from './Store/CartProvider'
 
-
-
 function App() {
   const [cartIsShown, setCartIsShown] = useState(false)
 
